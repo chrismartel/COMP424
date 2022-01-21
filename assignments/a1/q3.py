@@ -14,26 +14,40 @@ def main():
     for i in range(number_of_tsp):
         tsp_instances.append(TSP(number_of_cities))
 
-    # a) 
-    print('Brute Force')
+    # a) Solve each TSP by brute-force
+    print('Brute-Force')
     costs = list()
     for i in range(len(tsp_instances)):
         tsp_instances[i].brute_force()
-        costs.append(tsp_instances[i].current_cost)
+        costs.append(tsp_instances[i].optimal_cost)
 
     min_cost = min(costs)
     max_cost = max(costs)
     mean_cost = statistics.mean(costs)
     std_cost = statistics.stdev(costs)
 
-    print("min: ", min_cost)
-    print("max: ", max_cost)
-    print("mean: ", mean_cost)
-    print("std: ", std_cost)
+    print("min: {min_cost:.6f}".format(min_cost=min_cost))
+    print("max: {max_cost:.6f}".format(max_cost=max_cost))
+    print("mean: {mean_cost:.6f}".format(mean_cost=mean_cost))
+    print("std: {std_cost:.6f}\n".format(std_cost=std_cost))
 
 
-    
     # b) Baseline
+    print('Baseline')
+    costs = list()
+    for i in range(len(tsp_instances)):
+        costs.append(state_cost(tsp_instances[i].initial_state))
+
+    min_cost = min(costs)
+    max_cost = max(costs)
+    mean_cost = statistics.mean(costs)
+    std_cost = statistics.stdev(costs)
+
+    print("min: {min_cost:.6f}".format(min_cost=min_cost))
+    print("max: {max_cost:.6f}".format(max_cost=max_cost))
+    print("mean: {mean_cost:.6f}".format(mean_cost=mean_cost))
+    print("std: {std_cost:.6f}\n".format(std_cost=std_cost))
+
 
     # c) Hill Climbing
 
@@ -85,13 +99,13 @@ TSP problem instance
 """
 class TSP:
     def __init__(self, number_of_cities):
+        self.initial_state = list()
         self.current_state = list()
-        self.neighbours = list()
-        self.current_cost = 0
+        self.optimal_state = list()
+        self.optimal_cost = sys.float_info.max
         for i in range(number_of_cities):
-            self.current_state.append((random.random(), random.random()))
-            self.neighbours = state_neighbours(self.current_state)
-            self.current_cost = state_cost(self.current_state)
+            self.initial_state.append((random.random(), random.random()))
+            self.current_state = self.initial_state
     
     """
     Solve by Brute Force
@@ -99,7 +113,7 @@ class TSP:
     tour with the minimum cost.
     """
     def brute_force(self):
-        permutations = list(itertools.permutations(self.current_state, len(self.current_state)))
+        permutations = list(itertools.permutations(self.initial_state, len(self.initial_state)))
         min_cost = sys.float_info.max
         min_index = 0
         for i in range(len(permutations)):
@@ -107,8 +121,8 @@ class TSP:
             if cost < min_cost:
                 min_cost = cost
                 min_index = i
-        self.current_state = permutations[min_index]
-        self.current_cost = min_cost
+        self.optimal_state = permutations[min_index]
+        self.optimal_cost = min_cost
 
 if __name__ == "__main__":
     main()
