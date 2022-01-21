@@ -9,69 +9,79 @@ import statistics
 def main():
     number_of_tsp = 100
     number_of_cities = 7
+    print('number of cities: {number_of_cities}'.format(number_of_cities=number_of_cities))
+    print('number of TSP instances: {number_of_tsp}\n'.format(number_of_tsp=number_of_tsp))
 
     tsp_instances = list()
     for i in range(number_of_tsp):
         tsp_instances.append(TSP(number_of_cities))
 
-    # a) Solve each TSP by brute-force
-    print('Solution')
+    # a) Brute-Force
+    # Solve each TSP by brute-force
+    print('Brute-Force Solution')
     costs = list()
     for i in range(len(tsp_instances)):
-        tsp_instances[i].optimal_state, tsp_instances[i].optimal_cost = tsp_instances[i].brute_force()
+        tsp_instances[i].optimal_cost = tsp_instances[i].brute_force()
         costs.append(tsp_instances[i].optimal_cost)
-
-    min_cost = min(costs)
-    max_cost = max(costs)
-    mean_cost = statistics.mean(costs)
-    std_cost = statistics.stdev(costs)
-
-    print("min: {min_cost:.6f}".format(min_cost=min_cost))
-    print("max: {max_cost:.6f}".format(max_cost=max_cost))
-    print("mean: {mean_cost:.6f}".format(mean_cost=mean_cost))
-    print("std: {std_cost:.6f}\n".format(std_cost=std_cost))
-
+    print_stats(costs)
 
     # b) Baseline
+    # Compute the costs of the initial state of each TSP instance.
+    # Keep track of how many initial states are optimal
     print('Baseline')
+    optimal_count = 0 
     costs = list()
     for i in range(len(tsp_instances)):
-        costs.append(state_cost(tsp_instances[i].initial_state))
+        cost = state_cost(tsp_instances[i].initial_state)
+        costs.append(cost)
+        if cost == tsp_instances[i].optimal_cost:
+            optimal_count += 1
 
-    min_cost = min(costs)
-    max_cost = max(costs)
-    mean_cost = statistics.mean(costs)
-    std_cost = statistics.stdev(costs)
-
-    print("min: {min_cost:.6f}".format(min_cost=min_cost))
-    print("max: {max_cost:.6f}".format(max_cost=max_cost))
-    print("mean: {mean_cost:.6f}".format(mean_cost=mean_cost))
-    print("std: {std_cost:.6f}\n".format(std_cost=std_cost))
-
+    print_stats(costs)
+    print("{optimal_count}/{number_of_tsp} tsp instances were initialized as an optimal solution.\n".format(optimal_count=optimal_count, number_of_tsp=number_of_tsp))
 
     # c) Hill Climbing
+    # Solve each TSP using Hill climbing. Keep track of how many instances will end 
+    # up finding the optimal solution
     print('Hill Climbing')
     costs = list()
     optimal_count = 0
     for i in range(len(tsp_instances)):
-        final_state, final_cost = tsp_instances[i].hill_climbing()
+        final_cost = tsp_instances[i].hill_climbing()
         if final_cost <= tsp_instances[i].optimal_cost:
             optimal_count += 1
         costs.append(final_cost)
-        
 
-    min_cost = min(costs)
-    max_cost = max(costs)
-    mean_cost = statistics.mean(costs)
-    std_cost = statistics.stdev(costs)
+    print_stats(costs)
+    print("{optimal_count}/{number_of_tsp} tsp instances found an optimal solution using hill climbing.\n".format(optimal_count=optimal_count, number_of_tsp=number_of_tsp))
+    
+    # d) Scale up to 100 cities and repeat part b) and c)
+    print("Scaling up!\n")
+    number_of_cities = 100
+    tsp_instances = list()
 
-    print("min: {min_cost:.6f}".format(min_cost=min_cost))
-    print("max: {max_cost:.6f}".format(max_cost=max_cost))
-    print("mean: {mean_cost:.6f}".format(mean_cost=mean_cost))
-    print("std: {std_cost:.6f}".format(std_cost=std_cost))
-    print("{optimal_count} instances found the optimal solution.\n".format(optimal_count=optimal_count))
-    # d) Scale up!
+    for i in range(number_of_tsp):
+        tsp_instances.append(TSP(number_of_cities))
 
+    print('number of cities: {number_of_cities}'.format(number_of_cities=number_of_cities))
+    print('number of TSP instances: {number_of_tsp}\n'.format(number_of_tsp=number_of_tsp))
+
+    print('Baseline')
+    costs = list()
+    for i in range(len(tsp_instances)):
+        costs.append(state_cost(tsp_instances[i].initial_state))
+    print_stats(costs)
+
+    print('Hill Climbing')
+    costs = list()
+    optimal_count = 0
+    for i in range(len(tsp_instances)):
+        final_cost = tsp_instances[i].hill_climbing()
+        costs.append(final_cost)
+    print_stats(costs)
+
+
+# ---------------- HELPER FUNCTIONS ---------------- #
 """
 Compute cost between two cities
 a: tuple representing coordinates of city A
@@ -113,6 +123,16 @@ def state_neighbours(state):
 
     return neighbours
 
+'''
+Print statistics of sample list: min, max, mean , std
+'''
+def print_stats(sample):
+    print("min: {min:.6f}".format(min=min(sample)))
+    print("max: {max:.6f}".format(max=max(sample)))
+    print("mean: {mean:.6f}".format(mean=statistics.mean(sample)))
+    print("std: {std:.6f}\n".format(std=statistics.stdev(sample)))
+
+# ---------------- HELPER CLASSES ---------------- #
 """
 TSP problem instance
 """
@@ -121,13 +141,13 @@ class TSP:
         # initial config
         self.initial_state = list()
 
-        # optimal config
-        self.optimal_state = list()
-        self.optimal_cost = sys.float_info.max
-
         # generate random city coordinates
         for i in range(number_of_cities):
-            self.initial_state.append((random.random(), random.random()))
+            while(True):
+                element = (random.random(), random.random())
+                if element not in self.initial_state:
+                    self.initial_state.append(element)
+                    break
     
     """
     Solve by Brute Force
@@ -142,7 +162,7 @@ class TSP:
             if cost < min_cost:
                 min_cost = cost
                 min_index = i
-        return (permutations[min_index], min_cost)
+        return min_cost
 
     """
     Solve by Hill Climbing
@@ -168,7 +188,7 @@ class TSP:
 
             if min_cost >= current_cost:
                 # we are at a local min
-                return (current_state, current_cost)
+                return current_cost
             else:
                 # take a greedy step towards local optimum
                 current_state = neighbours[min_index]

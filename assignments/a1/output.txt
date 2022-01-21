@@ -1,0 +1,42 @@
+number of cities: 7
+number of TSP instances: 100
+
+Brute-Force Solution
+min: 1.464120
+max: 3.275059
+mean: 2.433082
+std: 0.385536
+
+Baseline
+min: 2.097432
+max: 5.381687
+mean: 3.604519
+std: 0.715103
+
+0/100 tsp instances were initialized as an optimal solution.
+
+Hill Climbing
+min: 1.464120
+max: 3.275059
+mean: 2.439309
+std: 0.387990
+
+38/100 tsp instances found an optimal solution using hill climbing.
+
+Scaling up!
+
+number of cities: 100
+number of TSP instances: 100
+
+Baseline
+min: 45.406790
+max: 60.715500
+mean: 52.153999
+std: 2.871286
+
+Hill Climbing
+min: 11.689059
+max: 17.169789
+mean: 14.208391
+std: 1.162588
+
